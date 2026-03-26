@@ -31,3 +31,7 @@ Route::fallback(function(){
     return '<img src="' . asset('src/explosion-boom.gif') . '" alt="404 Not Found" style="width: 100%; height: 100%; object-fit: cover;">';
 });
 
+// Calculator
+Route::get('compute/{num1}/{num2}', [CalculateController::class, 'compute'])->name('compute');
+
+// Utility
