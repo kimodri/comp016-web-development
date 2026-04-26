@@ -1,0 +1,36 @@
+:root {
+    --pal-pink: #F9B2D7;
+    --pal-blue: #CFECF3;
+    --pal-green: #DAF9DE;
+    --pal-yellow: #F6FFDC;
+    --pal-pink-deep: #e896c0;
+    --pal-link: #c2618f;
+    --pal-link-hover: #a04877;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(
+        135deg,
+        var(--pal-pink) 0%,
+        var(--pal-blue) 35%,
+        var(--pal-green) 70%,
+        var(--pal-yellow) 100%
+    );
+    /* background-attachment: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center; */
+}
+
+.custom-btn {
+    background-color: var(--pal-pink);
+    color: #fff;
+    border: none;
+    transition: background-color 0.15s ease;
+}
+
+p{
+    text-align: center;
+}
