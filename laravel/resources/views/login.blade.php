@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -11,9 +11,10 @@
     'resources/js/app.js'
     ])
 </head>
-
-<body>
-    <header style="background-color: #F9B2D7;">
+<body> -->
+@extends("common.main")
+@section('content')
+    <!-- <header style="background-color: #F9B2D7;">
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container">
                 <a class="navbar-brand" href="#">Hotel? Trabago</a>
@@ -30,7 +31,7 @@
                 </div>
             </div>
         </nav>
-    </header>
+    </header> -->
 
     <div class="container">
         <div class="row">
@@ -114,6 +115,7 @@
             </div>
         </div>
     </div>
-</body>
+@endsection
+<!-- </body>
 
-</html>
+</html> -->

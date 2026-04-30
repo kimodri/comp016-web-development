@@ -23,6 +23,7 @@ Route::get("/compute", [CalculateController::class, 'index'])->name('compute');
 
 Route::group(['prefix' => 'user'], function(){
     Route::get('/', [UserController::class, 'user'])->name('user');
+    Route::post('/', [UserController::class, 'userSubmit'])->name('user.submit');
     Route::get('/edit/{id}', [UserController::class, 'edit'])->name('user.edit');
     Route::get('/add/{id}', [UserController::class, 'add'])->name('user.add');
     Route::get('/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
@@ -37,4 +38,3 @@ Route::get('compute/{num1}/{num2}', [CalculateController::class, 'compute'])->na
 
 // Login
 Route::get('/login', [LoginController::class, 'login'])->name('login');
-

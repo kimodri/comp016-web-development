@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -29,9 +29,12 @@
             color: red;
         } */
     </style>
-</head>
+</head> -->
 
-<body class="body-cont">
+@extends("common.main")
+@section("title", "calculate")
+@section("content")
+
     <h1 style="color: blue;">Calculate Page</h1>
     <p>Sum: {{ $sum }}</p>
     <p class="diff">Difference: {{ $difference }}</p>
@@ -79,8 +82,4 @@
     <!-- <img src="path/to/your/image.jpg" alt="Sample Image" class="card-img-top" style="width: 100%; height: auto;"> -->
     <!-- BootStrap Icons -->
     <i class="bi bi-airplane"></i>
-
-
-</body>
-
-</html>
+@endsection
