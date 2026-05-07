@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
@@ -43,6 +45,20 @@ class UserController extends Controller
         Log::info('Hello last name: ' . $request->lname);
         Log::info('Hello email: ' . $request->email);
         Log::info('Hello password: ' . $request->password);
+
+        DB::table('users')->insert([
+            'fname'=>$request->fname,
+            'mname'=>$request->mname,
+            'lname'=>$request->lname,
+            'email'=>$request->email,
+            'password'=>Hash::make($request->password)           
+        ]);
+
+        $users = DB::table('users')->get();
+        
+        Log::info('===============END USER SUBMIT============');
+        
+        return $users;
 
     }
 }

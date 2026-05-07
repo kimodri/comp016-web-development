@@ -176,6 +176,64 @@ Custom messages are keyed as `field.rule` (e.g. `fname.required`, `lname.min`). 
 
 The commented-out `// dd($request->fname);` line shows a common debugging pattern — dump a single request field and halt execution to inspect what was actually submitted before validation runs.
 
+## 05/07/2026
+Continuing from `userSubmit()` in `UserController`, the form submission now persists data to the database and returns it.
+
+### 1. The `DB` Facade — Query Builder
+
+`Illuminate\Support\Facades\DB` provides Laravel's query builder, a fluent interface for running database queries without writing raw SQL:
+
+```php
+use Illuminate\Support\Facades\DB;
+```
+
+#### Inserting rows
+
+After validation, the submitted fields are inserted into the `users` table:
+
+```php
+DB::table('users')->insert([
+    'fname'    => $request->fname,
+    'mname'    => $request->mname,
+    'lname'    => $request->lname,
+    'email'    => $request->email,
+    'password' => Hash::make($request->password),
+]);
+```
+
+`DB::table('users')` selects the target table; `->insert([...])` performs an `INSERT` using the array's keys as column names and the values as the row data.
+
+#### Reading rows
+
+After insertion, all rows are fetched and returned from the controller:
+
+```php
+$users = DB::table('users')->get();
+return $users;
+```
+
+`->get()` returns a `Collection` of `stdClass` objects (one per row). When a controller returns a collection or array, Laravel automatically serializes it to JSON in the HTTP response.
+
+### 2. Password Hashing with `Hash::make()`
+
+`Illuminate\Support\Facades\Hash` is used to hash the password before storing it — never store plain-text passwords:
+
+```php
+use Illuminate\Support\Facades\Hash;
+
+'password' => Hash::make($request->password),
+```
+
+`Hash::make()` uses bcrypt by default and produces a salted, one-way hash. To verify a password later (e.g. on login), use `Hash::check($plain, $hashed)` — the original cannot be recovered.
+
+### 3. Log Marker
+
+A delimiter log line was added at the end of `userSubmit()` to make it easy to spot the end of a submission cycle in the log file:
+
+```php
+Log::info('===============END USER SUBMIT============');
+```
+
 ### 5. New Route
 
 In `routes/web.php`, a `POST /user` route was added to handle the form submission:
