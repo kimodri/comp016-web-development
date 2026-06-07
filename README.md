@@ -331,3 +331,108 @@ The placeholder "No records yet" row was replaced by a loop that renders one `<t
 - Each `$post` is a `stdClass` object whose properties match the selected columns — including the JOIN aliases `status_name` and `sname`.
 - The conditional `@if($post->sname != 'published')` hides the edit icon for posts whose status is `published`, so only drafts/other statuses can be edited.
 - The table header was updated: the "Created By" column became "Created At", and a new "Action" column holds the edit icon.
+
+## 06/02/2026
+Changes from commit `170ca99` (post 05/27/26) to `e8158dd` (06-02-26). This commit adds an **edit/update flow** for posts: a new edit form, an `UPDATE` query via the query builder, two new routes (`GET`/`PUT`), and the edit icon now actually links somewhere.
+
+### 1. Fetching a Single Row (`->find($id)`)
+
+`PostController@showUpdate` loads the post being edited along with the status options for the dropdown:
+
+```php
+public function showUpdate($id)
+{
+    $statuses = DB::table('statuses')->get();
+    $post = DB::table('post')->find($id);
+
+    return view('post-update', compact('statuses', 'post'));
+}
+```
+
+- `DB::table('post')->find($id)` is a shorthand for `where('id', $id)->first()` — it returns a single `stdClass` row (or `null` if no match).
+- Compare with `->get()`, which returns a `Collection` of rows.
+
+### 2. Updating a Row (`->where(...)->update([...])`)
+
+`PostController@updateSubmit` validates input and runs an `UPDATE`:
+
+```php
+public function updateSubmit(Request $request, $id)
+{
+    $request->validate([
+        'title'       => ['required'],
+        'description' => ['required'],
+        'status'      => ['required'],
+    ]);
+
+    DB::table('post')
+        ->where('id', $id)
+        ->update([
+            'title'       => $request->title,
+            'description' => $request->description,
+            'status'      => $request->status,
+            'updated_at'  => now(),
+        ]);
+
+    return redirect()->route('post.form');
+}
+```
+
+- `->where('id', $id)->update([...])` is the query-builder equivalent of `UPDATE post SET ... WHERE id = ?`. Without the `where`, every row in the table would be updated.
+- `updated_at` is filled with `now()` so the row reflects when it was last changed.
+- The method also takes `$id` as a second argument — Laravel passes route parameters into the controller method after the injected `Request`.
+
+### 3. New Edit View (`post-update.blade.php`)
+
+A new Blade view was added at `resources/views/post-update.blade.php` that extends `common.main` and renders an edit form pre-populated with the existing post:
+
+```blade
+<form method="POST" action="{{ route('post.updateSubmit', $post->id) }}">
+    @csrf
+    @method('PUT')
+    ...
+</form>
+```
+
+- `route('post.updateSubmit', $post->id)` generates the URL `/post/update/{id}` with the post's id substituted in.
+- `@method('PUT')` — HTML forms can only natively submit `GET` or `POST`. This directive injects a hidden `_method=PUT` field that Laravel reads to dispatch the request as a `PUT`, matching the route definition.
+- `@csrf` is still required, same as on the create form.
+
+#### Pre-filling fields
+
+Each input shows the current value via `value="{{ $post->title }}"` so the user sees what's already saved.
+
+#### Preserving the selected status
+
+The dropdown loops over `$statuses` and marks the post's current status as `selected`:
+
+```blade
+@foreach($statuses as $status)
+    @if($post->status == $status->id)
+        <option value="{{ $status->id }}" selected>{{ $status->display_name }}</option>
+    @else
+        <option value="{{ $status->id }}">{{ $status->display_name }}</option>
+    @endif
+@endforeach
+```
+
+### 4. Linking the Edit Icon
+
+In `post.blade.php`, the previously empty `href=""` on the pencil icon now points to the edit route:
+
+```blade
+<a href="{{ route('post.showUpdate', $post->id) }}" class="bi bi-pencil-square"></a>
+```
+
+### 5. New Routes and `Route::put`
+
+Two new routes were added in `routes/web.php`:
+
+```php
+Route::get('/post/update/{id}',  [PostController::class, 'showUpdate'])->name('post.showUpdate');
+Route::put('/post/update/{id}',  [PostController::class, 'updateSubmit'])->name('post.updateSubmit');
+```
+
+- `Route::put(...)` registers a route that only matches `PUT` requests — used by REST convention for updates.
+- The two routes share the same URI but differ by HTTP verb: `GET` shows the form, `PUT` processes the submission.
+- The `Route::fallback(...)` block was moved to the bottom of the file so it doesn't accidentally swallow routes defined after it.
