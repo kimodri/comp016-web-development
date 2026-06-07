@@ -16,7 +16,7 @@ class PostController extends Controller
         $posts = DB::table('post')
             ->leftJoin('statuses', 'post.status', 'statuses.id')  // LEFT JOIN statuses ON status_id
             ->select('post.*', 'statuses.display_name as status_name', 'statuses.name as sname')   // SELECT post.*, statuses.display_name AS status_name
-            ->get();   
+            ->get();
         $statuses = DB::table('statuses')->get();  // SELECT * FROM statuses
         // return $posts;
         return view('post', compact('posts', 'statuses'));
@@ -29,12 +29,12 @@ class PostController extends Controller
             'title' => ['required'],
             // 'description' => ['required'],
         ]);
-        
+
         Log::info('Post submitted', [
             'title' => $request->title,
             'description' => $request->description,
         ]);
-        
+
         DB::table('post')->insert([
             'title' => $request->title,
             'description' => $request->description,
@@ -42,9 +42,40 @@ class PostController extends Controller
             'created_at' => now(),  // date today
             'status' => $request->status
         ]);
-        
+
         return redirect()->route('post.form');
         // return redirect()->route('post.form')->with('status', 'Post submitted!');
+    }
+
+
+    public function showUpdate($id)
+    {
+
+        $statuses = DB::table('statuses')->get();
+        $post = DB::table('post')->find($id);
+
+        return view('post-update', compact('statuses', 'post'));
+    }
+
+    public function updateSubmit(Request $request, $id)
+    {
+        $request->validate([
+            'title' => ['required'],
+            'description' => ['required'],
+            'status' => ['required']
+        ]);
+        
+        DB::table('post')
+            ->where('id', $id)  
+            ->update([
+                'title' => $request->title,
+                'description' => $request->description,
+                'status' => $request->status,
+                'updated_at' => now()
+            ]);
+
+        return redirect()->route('post.form');
+
     }
 }
 

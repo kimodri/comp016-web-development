@@ -243,3 +243,91 @@ Route::post('/', [UserController::class, 'userSubmit'])->name('user.submit');
 ```
 
 This pairs with the existing `GET /user` route under the `user` prefix group.
+
+## 05/27/2026
+Changes from commit `b24141b` (finished finals) to `170ca99` (post 05/27/26). Both modifications are in `PostController` and `post.blade.php` — the post-creation flow now reads from and writes to the database, and renders the existing posts in a table.
+
+### 1. Query Builder JOINs (`leftJoin`)
+
+`PostController@index` now fetches posts together with their status by joining the `statuses` table:
+
+```php
+$posts = DB::table('post')
+    ->leftJoin('statuses', 'post.status', 'statuses.id')
+    ->select('post.*', 'statuses.display_name as status_name', 'statuses.name as sname')
+    ->get();
+$statuses = DB::table('statuses')->get();
+```
+
+- `->leftJoin('statuses', 'post.status', 'statuses.id')` is equivalent to SQL `LEFT JOIN statuses ON post.status = statuses.id`. A `LEFT JOIN` keeps posts even if no matching status row exists (those columns just come back `null`).
+- `->select(...)` picks the columns returned. `'statuses.display_name as status_name'` and `'statuses.name as sname'` use SQL aliases so the joined columns don't collide with `post.*` and can be referenced as `$post->status_name` / `$post->sname` in the view.
+- The second call, `DB::table('statuses')->get()`, is a simple unfiltered fetch — used separately to populate the dropdown.
+
+### 2. Passing Multiple Variables to a View (`compact`)
+
+```php
+return view('post', compact('posts', 'statuses'));
+```
+
+`compact('posts', 'statuses')` is PHP shorthand for `['posts' => $posts, 'statuses' => $statuses]`. Both variables become available inside `post.blade.php`.
+
+### 3. Dynamic `<select>` Populated from the DB
+
+In `post.blade.php`, a Bootstrap `form-select` is rendered by looping over `$statuses`:
+
+```blade
+<select class="form-select" name="status">
+    <option selected></option>
+    @foreach($statuses as $status)
+        <option value="{{ $status->id }}">{{ $status->display_name }}</option>
+    @endforeach
+</select>
+```
+
+The selected `<option>`'s `value` is the `statuses.id`, which gets submitted as the `status` form field and stored on the new post row as a foreign key.
+
+### 4. Storing the Post (`DB::insert` with `now()` and FK)
+
+`PostController@store` now persists the submission to the `post` table:
+
+```php
+DB::table('post')->insert([
+    'title'       => $request->title,
+    'description' => $request->description,
+    'created_by'  => 1,
+    'created_at'  => now(),
+    'status'      => $request->status,
+]);
+
+return redirect()->route('post.form');
+```
+
+- `now()` is a Laravel helper that returns the current timestamp (a `Carbon` instance) — used to fill `created_at`.
+- `'status' => $request->status` stores the `statuses.id` selected in the dropdown as a foreign key on the post.
+- `'created_by' => 1` is currently hard-coded (no auth yet).
+- The `'description' => ['required']` validation rule was commented out, making description optional.
+- After insertion, the controller redirects back to the post form so the page reloads with the newly created post in the list.
+
+### 5. Listing Posts in a Table (`@foreach` over `$posts`)
+
+The placeholder "No records yet" row was replaced by a loop that renders one `<tr>` per post:
+
+```blade
+@foreach($posts as $post)
+<tr>
+    <td>{{ $post->title }}</td>
+    <td>{{ $post->description }}</td>
+    <td>{{ $post->created_at }}</td>
+    <td>{{ $post->status_name }}</td>
+    <td>
+        @if($post->sname != 'published')
+            <a href="" class="bi bi-pencil-square"></a>
+        @endif
+    </td>
+</tr>
+@endforeach
+```
+
+- Each `$post` is a `stdClass` object whose properties match the selected columns — including the JOIN aliases `status_name` and `sname`.
+- The conditional `@if($post->sname != 'published')` hides the edit icon for posts whose status is `published`, so only drafts/other statuses can be edited.
+- The table header was updated: the "Created By" column became "Created At", and a new "Action" column holds the edit icon.

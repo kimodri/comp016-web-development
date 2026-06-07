@@ -70,7 +70,7 @@
                 <td> {{ $post->status_name }} </td>
                 <td>
                     @if($post->sname != 'published')
-                        <a href="" class="bi bi-pencil-square"></a>
+                        <a href="{{ route('post.showUpdate', $post->id) }}" class="bi bi-pencil-square"></a>
                     @endif
 
                 </td>

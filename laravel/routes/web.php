@@ -30,9 +30,6 @@ Route::group(['prefix' => 'user'], function(){
     Route::get('/delete/{id}', [UserController::class, 'delete'])->name('user.delete');
 });
 
-Route::fallback(function(){
-    return '<img src="' . asset('src/explosion-boom.gif') . '" alt="404 Not Found" style="width: 100%; height: 100%; object-fit: cover;">';
-});
 
 // Calculator
 Route::get('compute/{num1}/{num2}', [CalculateController::class, 'compute'])->name('compute');
@@ -43,3 +40,10 @@ Route::get('/login', [LoginController::class, 'login'])->name('login');
 // Post
 Route::get('/post', [PostController::class, 'index'])->name('post.form');
 Route::post('/post', [PostController::class, 'store'])->name('post');
+Route::get('/post/update/{id}', [PostController::class, 'showUpdate'])->name('post.showUpdate');
+Route::put('/post/update/{id}', [PostController::class, 'updateSubmit'])->name('post.updateSubmit');
+// Route::put('/post/update', [PostController::class, 'updateSubmit'])->name('post.updateSubmit');
+
+Route::fallback(function(){
+    return '<img src="' . asset('src/explosion-boom.gif') . '" alt="404 Not Found" style="width: 100%; height: 100%; object-fit: cover;">';
+});
