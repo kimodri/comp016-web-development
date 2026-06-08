@@ -36,9 +36,7 @@ class LoginController extends Controller
         );
 
         $users = DB::table('users')->get();
-        
-        Log::info('===============END USER SUBMIT============');
-        
+            
         return redirect()->route('getUsers');
     }
 }

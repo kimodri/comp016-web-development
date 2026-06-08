@@ -8,7 +8,7 @@ Login Page
 <div class="container mt-5">
     <form method="POST" action="{{ route('submitEdit', ['id'=> $id]) }}">
         @csrf
-        @method('PUT')
+        @method('POST')
         <div class="mb-3">
             <label for="email" class="form-label">Email Address</label>
             <input type="email" class="form-control" id="email" name="email">
