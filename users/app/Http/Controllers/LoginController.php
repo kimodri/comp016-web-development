@@ -10,7 +10,8 @@ use Illuminate\Support\Facades\Log;
 class LoginController extends Controller
 {
     public function getLogin(){
-        return view('login');
+        $pageName = "login";
+        return view('login', compact('pageName'));
     }
 
     public function postLogin(Request $request){
@@ -38,6 +39,6 @@ class LoginController extends Controller
         
         Log::info('===============END USER SUBMIT============');
         
-        return redirect()->route('login');
+        return redirect()->route('getUsers');
     }
 }
