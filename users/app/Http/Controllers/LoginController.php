@@ -11,7 +11,8 @@ class LoginController extends Controller
 {
     public function getLogin(){
         $pageName = "login";
-        return view('login', compact('pageName'));
+        $usertypes = DB::table('user_types')->get();
+        return view('login', compact('pageName', 'usertypes'));
     }
 
     public function postLogin(Request $request){
@@ -27,10 +28,11 @@ class LoginController extends Controller
 
         DB::table('users')->insert(
             [
+                'email'=> $request->email,
                 'fname'=> $request->fname,
                 'mname'=> $request->mname,
                 'lname'=> $request->lname,
-                'email'=> $request->email,
+                'user_type'=> $request->usertype,
                 'password'=> Hash::make($request->password),
             ]
         );

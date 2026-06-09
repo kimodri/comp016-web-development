@@ -1,7 +1,7 @@
 @extends('common.header')
 
 @section('title')
-Login Page
+Edit Page
 @endsection
 
 @section('content')
@@ -25,10 +25,17 @@ Login Page
             <label for="lname" class="form-label">Last Name:</label>
             <input type="text" class="form-control" id="lname" name="lname">
         </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" class="form-control" id="password" name="password">
-        </div>
+        <select class="form-select" aria-label="Default select example" name="usertype">
+            <option></option>
+            @foreach($user_types as $user_type)
+                @if($user->user_type == $user_type->id)
+                    <option selected value="{{ $user_type->id }}">{{ $user_type->display_name }}</option>
+                @else
+                    <option value="{{ $user_type->id }}">{{ $user_type->display_name }}</option>
+                @endif
+            @endforeach
+
+        </select>
         <button type="submit" class="btn btn-primary">Edit User</button>
     </form>
 </div>

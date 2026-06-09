@@ -28,6 +28,13 @@ Login Page
             <label for="password" class="form-label">Password</label>
             <input type="password" class="form-control" id="password" name="password">
         </div>
+        <!-- Div here about user type dropdown -->
+        <select class="form-select mb-3" aria-label="Default select example" name="usertype">
+            <option selected></option>
+            @foreach($usertypes as $usertype)
+                <option value="{{ $usertype->id }}">{{ $usertype->display_name }}</option>
+            @endforeach
+        </select>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 </div>
